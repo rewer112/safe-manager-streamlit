@@ -1,4 +1,6 @@
 import streamlit as st
+from io import BytesIO
+from reportlab.pdfgen import canvas
 from datetime import datetime
 
 # ================== CONFIGURACIÓN DE IDIOMAS =====================
@@ -40,6 +42,28 @@ OPTIMAL = {
 # ================== APP STREAMLIT =====================
 st.set_page_config(page_title="Safe Manager", layout="centered")
 
+st.markdown("""
+    <style>
+    div.stButton > button {
+        font-size: 16px;
+        background-color: #1f77b4;
+        color: white;
+        padding: 0.6em 1.5em;
+        border-radius: 8px;
+    }
+    .custom-input input {
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .highlight-box {
+        background-color: #f8f9fa;
+        padding: 1em;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 lang = st.sidebar.selectbox("🌐 Idioma / Language", ["ES", "EN"])
 L = LANG_ES if lang == "ES" else LANG_EN
 
@@ -53,19 +77,25 @@ st.markdown("---")
 
 with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     denoms = ["$1", "$5", "$10", "$20", "$50", "$100", "¢25", "¢10", "¢5", "¢1"]
+    custom_labels = {
+        "$1": "💵 $1", "$5": "💵 $5", "$10": "💵 $10", "$20": "💵 $20",
+        "$50": "💵 $50", "$100": "💵 $100", "¢25": "💸 ¢25", "¢10": "💸 ¢10",
+        "¢5": "💸 ¢5", "¢1": "💸 ¢1"
+    }
     amounts = {}
-    cols = st.columns(2)
+    cols = st.columns(4)
     for i, d in enumerate(denoms):
-        with cols[i % 2]:
+        with cols[i % 4]:
             amounts[d] = st.number_input(
-                f"{d} (en $)",
+                custom_labels[d],
                 min_value=0.0,
                 step=0.01,
                 value=0.0,
                 format="%.2f",
-                key=f"input_{d}",
-                label_visibility="visible"
+                key=f"input_{d}"
             )
+
+st.markdown("---")
 
 if st.button(L["calculate"]):
     total = sum(amounts.values()) + sum(register_check) * 200
@@ -104,7 +134,7 @@ if st.button(L["calculate"]):
             suggestions.append(msg)
 
     st.markdown(f"### 💰 {L['result_header']}")
-    st.write(f"**Total (safe + cajas):** ${total:.2f}")
+    st.markdown(f"<div class='highlight-box'><strong>Total (safe + cajas):</strong> ${total:.2f}</div>", unsafe_allow_html=True)
 
     if small_change < 1200:
         st.warning(L["insufficient"])
@@ -117,9 +147,6 @@ if st.button(L["calculate"]):
             st.write(s)
 
         # Generar PDF
-        from io import BytesIO
-        from reportlab.pdfgen import canvas
-
         buffer = BytesIO()
         c = canvas.Canvas(buffer)
         c.setFont("Helvetica-Bold", 14)
@@ -134,7 +161,6 @@ if st.button(L["calculate"]):
             y -= 20
 
         c.setFont("Helvetica-Oblique", 10)
-        from datetime import datetime
         c.drawString(60, y - 30, f"Generado: {datetime.now().strftime('%d-%m-%Y %H:%M')} | By Juan Morillo")
         c.save()
 
