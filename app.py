@@ -1,4 +1,7 @@
 import streamlit as st
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from datetime import datetime
 
 # ================== CONFIGURACIÓN DE IDIOMAS =====================
 LANG_ES = {
@@ -50,7 +53,8 @@ st.markdown("""
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .small-input input {
-        font-size: 14px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -72,7 +76,15 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     cols = st.columns(2)
     for i, d in enumerate(denoms):
         with cols[i % 2]:
-            amounts[d] = st.number_input(f"{d} (en $)", min_value=0.0, step=0.01, value=0.0, key=f"input_{d}")
+            amounts[d] = st.number_input(
+                f"{d} (en $)",
+                min_value=0.0,
+                step=0.01,
+                value=0.0,
+                format="$%.2f",
+                key=f"input_{d}",
+                label_visibility="visible"
+            )
 
 if st.button(L["calculate"]):
     total = sum(amounts.values()) + sum(register_check) * 200
@@ -122,6 +134,32 @@ if st.button(L["calculate"]):
         st.subheader(L["suggestions"])
         for s in suggestions:
             st.write(s)
+
+        # Generar PDF
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer)
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(100, 800, "🔁 Cambio sugerido (Safe Manager)")
+        c.setFont("Helvetica", 12)
+        y = 780
+        for s in suggestions:
+            if y < 100:
+                c.showPage()
+                y = 800
+            c.drawString(60, y, f"- {s}")
+            y -= 20
+
+        c.setFont("Helvetica-Oblique", 10)
+        c.drawString(60, y - 30, f"Generado: {datetime.now().strftime('%d-%m-%Y %H:%M')} | By Juan Morillo")
+        c.save()
+
+        buffer.seek(0)
+        st.download_button(
+            label="📄 Descargar PDF de sugerencia",
+            data=buffer,
+            file_name=f"SafeManager_Cambio_{datetime.now().strftime('%Y-%m-%d')}.pdf",
+            mime="application/pdf"
+        )
 
     if total < 2300:
         st.info(L["iou_warning"])
