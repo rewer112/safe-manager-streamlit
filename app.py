@@ -39,23 +39,40 @@ OPTIMAL = {
 # ================== APP STREAMLIT =====================
 st.set_page_config(page_title="Safe Manager", layout="centered")
 
+# Estilo visual
+st.markdown("""
+    <style>
+    .result-block {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .small-input input {
+        font-size: 14px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 lang = st.sidebar.selectbox("🌐 Idioma / Language", ["ES", "EN"])
 L = LANG_ES if lang == "ES" else LANG_EN
 
 st.title(L["header"])
 
-st.markdown(f"### {L['registers']}")
-cols = st.columns(4)
-register_check = [cols[i].checkbox(f"Caja {i+1}" if lang == "ES" else f"Register {i+1}") for i in range(4)]
+with st.expander(L["registers"], expanded=True):
+    cols = st.columns(4)
+    register_check = [cols[i].checkbox(f"Caja {i+1}" if lang == "ES" else f"Register {i+1}") for i in range(4)]
 
 st.markdown("---")
-st.subheader("💵 Ingreso por denominación")
 
-denoms = ["$1", "$5", "$10", "$20", "$50", "$100", "¢25", "¢10", "¢5", "¢1"]
-amounts = {}
-
-for d in denoms:
-    amounts[d] = st.number_input(f"{d} (en $)", min_value=0.0, step=0.01, value=0.0)
+with st.expander("💵 Ingresar dinero por denominación", expanded=True):
+    denoms = ["$1", "$5", "$10", "$20", "$50", "$100", "¢25", "¢10", "¢5", "¢1"]
+    amounts = {}
+    cols = st.columns(2)
+    for i, d in enumerate(denoms):
+        with cols[i % 2]:
+            amounts[d] = st.number_input(f"{d} (en $)", min_value=0.0, step=0.01, value=0.0, key=f"input_{d}")
 
 if st.button(L["calculate"]):
     total = sum(amounts.values()) + sum(register_check) * 200
@@ -76,18 +93,31 @@ if st.button(L["calculate"]):
                 suggestions.append(f"🔹 {'Ordenar' if lang == 'ES' else 'Order'} {int(round(falta))} paquetes de {k} (≈ ${total_faltante})")
             if 'max_packs' in cfg and n_packs > cfg['max_packs']:
                 warnings.append(f"⚠️ {'Demasiados paquetes' if lang == 'ES' else 'Too many packs'} de {k}. Máx: {cfg['max_packs']}, tienes: {n_packs:.1f}")
+
         if k in ["$10", "$20", "$50", "$100"] and v > 0:
-            suggestions.append(f"🔁 {'Cambiar' if lang == 'ES' else 'Exchange'} ${v:.2f} de {k} por billetes pequeños.")
+            remaining = v
+            to_5 = int(remaining // 100)
+            remaining -= to_5 * 100
+            to_1 = int(remaining // 25)
+            remaining -= to_1 * 25
+            to_coins = round(remaining, 2)
+            msg = f"🔁 Cambiar ${v:.2f} de {k} por: "
+            if to_5 > 0:
+                msg += f"{to_5} paquetes de $5"
+            if to_1 > 0:
+                msg += f", {to_1} paquetes de $1"
+            if to_coins > 0:
+                msg += f", y ${to_coins:.2f} en monedas"
+            suggestions.append(msg)
 
     st.markdown(f"### 💰 {L['result_header']}")
-    st.write(f"**Total (safe + cajas):** ${total:.2f}")
+    st.markdown(f"<div class='result-block'><strong>Total (safe + cajas):</strong> ${total:.2f}</div>", unsafe_allow_html=True)
 
     if small_change < 1200:
         st.warning(L["insufficient"])
     if sum(register_check) < 4:
         st.warning(L["incomplete_registers"].format(sum(register_check)))
 
-    st.markdown("---")
     if suggestions:
         st.subheader(L["suggestions"])
         for s in suggestions:
@@ -99,7 +129,7 @@ if st.button(L["calculate"]):
             st.success(L["iou_confirm"].format(round(2300 - total, 2)))
 
     if warnings:
-        st.error("⚠️ " + "\n".join(warnings))
+        st.error("\n".join(warnings))
 
 st.markdown("---")
 st.caption("By Juan Morillo")
