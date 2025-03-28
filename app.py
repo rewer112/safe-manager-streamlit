@@ -77,11 +77,11 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     for i, d in enumerate(denoms):
         with cols[i % 2]:
             amounts[d] = st.number_input(
-                f"{d} (en $)",
+                f"${d} (USD)",
                 min_value=0.0,
                 step=0.01,
                 value=0.0,
-                format="$%.2f",
+                format="%.2f",
                 key=f"input_{d}",
                 label_visibility="visible"
             )
