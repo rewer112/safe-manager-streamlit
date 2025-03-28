@@ -85,27 +85,27 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     }
     amounts = {}
 
-    st.markdown("**💵 Billetes**")
+    st.markdown("### 💵 Billetes")
     for d in billetes:
-            amounts[d] = st.number_input(
-                custom_labels[d],
-                min_value=0.0,
-                step=0.01,
-                value=0.0,
-                format="%.2f",
-                key=f"input_{d}"
-            )
+        amounts[d] = st.number_input(
+            custom_labels[d],
+            min_value=0.0,
+            step=0.01,
+            value=0.0,
+            format="%.2f",
+            key=f"input_{d}"
+        )
 
-    st.markdown("**🪙 Monedas**")
+    st.markdown("### 🪙 Monedas")
     for d in monedas:
-            amounts[d] = st.number_input(
-                custom_labels[d],
-                min_value=0.0,
-                step=0.01,
-                value=0.0,
-                format="%.2f",
-                key=f"input_{d}"
-            )
+        amounts[d] = st.number_input(
+            custom_labels[d],
+            min_value=0.0,
+            step=0.01,
+            value=0.0,
+            format="%.2f",
+            key=f"input_{d}"
+        )
 
 st.markdown("---")
 
