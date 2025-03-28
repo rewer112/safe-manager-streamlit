@@ -64,7 +64,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-lang = st.sidebar.selectbox("🌐 Idioma / Language", ["ES", "EN"])
+st.sidebar.markdown("#### 🌐 " + ("Seleccionar idioma" if st.session_state.get("lang", "ES") == "ES" else "Select Language"))
+lang = st.sidebar.selectbox("", ["ES", "EN"])
+st.session_state["lang"] = lang
 L = LANG_ES if lang == "ES" else LANG_EN
 
 st.title(L["header"])
@@ -85,7 +87,7 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     }
     amounts = {}
 
-    st.markdown("### 💵 Billetes")
+    st.markdown(f"### 💵 {'Billetes' if lang == 'ES' else 'Bills'}")
     for d in billetes:
         amounts[d] = st.number_input(
             custom_labels[d],
@@ -96,7 +98,7 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
             key=f"input_{d}"
         )
 
-    st.markdown("### 🪙 Monedas")
+    st.markdown(f"### 🪙 {'Monedas' if lang == 'ES' else 'Coins'}")
     for d in monedas:
         amounts[d] = st.number_input(
             custom_labels[d],
@@ -125,7 +127,7 @@ if st.button(L["calculate"]):
             if n_packs < cfg["target_packs"]:
                 falta = cfg["target_packs"] - n_packs
                 total_faltante = round(falta * size, 2)
-                suggestions.append(f"🔹 {'Ordenar' if lang == 'ES' else 'Order'} {int(round(falta))} paquetes de {k} (≈ ${total_faltante})")
+                suggestions.append(f"🔹 {'Ordenar' if lang == 'ES' else 'Order'} {int(round(falta))} {'paquetes' if lang == 'ES' else 'packs'} de {k}" (≈ ${total_faltante})")
             if 'max_packs' in cfg and n_packs > cfg['max_packs']:
                 warnings.append(f"⚠️ {'Demasiados paquetes' if lang == 'ES' else 'Too many packs'} de {k}. Máx: {cfg['max_packs']}, tienes: {n_packs:.1f}")
 
@@ -136,13 +138,13 @@ if st.button(L["calculate"]):
             to_1 = int(remaining // 25)
             remaining -= to_1 * 25
             to_coins = round(remaining, 2)
-            msg = f"🔁 Cambiar ${v:.2f} de {k} por: "
+            msg = f"🔁 {'Cambiar' if lang == 'ES' else 'Exchange'} ${v:.2f} de {k} {'por' if lang == 'ES' else 'for'}: "
             if to_5 > 0:
-                msg += f"{to_5} paquetes de $5"
+                msg += f"{to_5} {'paquetes' if lang == 'ES' else 'packs'} de $5"
             if to_1 > 0:
-                msg += f", {to_1} paquetes de $1"
+                msg += f", {to_1} {'paquetes' if lang == 'ES' else 'packs'} de $1"
             if to_coins > 0:
-                msg += f", y ${to_coins:.2f} en monedas"
+                msg += f", {'y' if lang == 'ES' else 'and'} ${to_coins:.2f} {'en monedas' if lang == 'ES' else 'in coins'}"
             suggestions.append(msg)
 
     st.markdown(f"### 💰 {L['result_header']}")
