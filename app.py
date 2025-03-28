@@ -1,6 +1,4 @@
 import streamlit as st
-from io import BytesIO
-from reportlab.pdfgen import canvas
 from datetime import datetime
 
 # ================== CONFIGURACIÓN DE IDIOMAS =====================
@@ -42,23 +40,6 @@ OPTIMAL = {
 # ================== APP STREAMLIT =====================
 st.set_page_config(page_title="Safe Manager", layout="centered")
 
-# Estilo visual
-st.markdown("""
-    <style>
-    .result-block {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 1rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .small-input input {
-        font-size: 16px !important;
-        font-weight: bold !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 lang = st.sidebar.selectbox("🌐 Idioma / Language", ["ES", "EN"])
 L = LANG_ES if lang == "ES" else LANG_EN
 
@@ -77,7 +58,7 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     for i, d in enumerate(denoms):
         with cols[i % 2]:
             amounts[d] = st.number_input(
-                f"${d} (USD)",
+                f"{d} (en $)",
                 min_value=0.0,
                 step=0.01,
                 value=0.0,
@@ -123,7 +104,7 @@ if st.button(L["calculate"]):
             suggestions.append(msg)
 
     st.markdown(f"### 💰 {L['result_header']}")
-    st.markdown(f"<div class='result-block'><strong>Total (safe + cajas):</strong> ${total:.2f}</div>", unsafe_allow_html=True)
+    st.write(f"**Total (safe + cajas):** ${total:.2f}")
 
     if small_change < 1200:
         st.warning(L["insufficient"])
@@ -136,6 +117,9 @@ if st.button(L["calculate"]):
             st.write(s)
 
         # Generar PDF
+        from io import BytesIO
+        from reportlab.pdfgen import canvas
+
         buffer = BytesIO()
         c = canvas.Canvas(buffer)
         c.setFont("Helvetica-Bold", 14)
@@ -150,6 +134,7 @@ if st.button(L["calculate"]):
             y -= 20
 
         c.setFont("Helvetica-Oblique", 10)
+        from datetime import datetime
         c.drawString(60, y - 30, f"Generado: {datetime.now().strftime('%d-%m-%Y %H:%M')} | By Juan Morillo")
         c.save()
 
