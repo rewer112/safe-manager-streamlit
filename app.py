@@ -86,7 +86,7 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
     amounts = {}
 
     st.markdown("**💵 Billetes**")
-    cols_b = st.columns(4)
+    cols_b = st.columns(2)
     for i, d in enumerate(billetes):
         with cols_b[i % 4]:
             amounts[d] = st.number_input(
@@ -99,7 +99,7 @@ with st.expander("💵 Ingresar dinero por denominación", expanded=True):
             )
 
     st.markdown("**🪙 Monedas**")
-    cols_m = st.columns(4)
+    cols_m = st.columns(2)
     for i, d in enumerate(monedas):
         with cols_m[i % 4]:
             amounts[d] = st.number_input(
