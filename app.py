@@ -127,7 +127,9 @@ if st.button(L["calculate"]):
             if n_packs < cfg["target_packs"]:
                 falta = cfg["target_packs"] - n_packs
                 total_faltante = round(falta * size, 2)
-                suggestions.append(f"🔹 {'Ordenar' if lang == 'ES' else 'Order'} {int(round(falta))} {'paquetes' if lang == 'ES' else 'packs'} de {k}" (≈ ${total_faltante})")
+                suggestions.append(
+    f"🔹 {'Ordenar' if lang == 'ES' else 'Order'} {int(round(falta))} {'paquetes' if lang == 'ES' else 'packs'} de {k} (≈ ${total_faltante})"
+))
             if 'max_packs' in cfg and n_packs > cfg['max_packs']:
                 warnings.append(f"⚠️ {'Demasiados paquetes' if lang == 'ES' else 'Too many packs'} de {k}. Máx: {cfg['max_packs']}, tienes: {n_packs:.1f}")
 
