@@ -76,16 +76,32 @@ with st.expander(L["registers"], expanded=True):
 st.markdown("---")
 
 with st.expander("💵 Ingresar dinero por denominación", expanded=True):
-    denoms = ["$1", "$5", "$10", "$20", "$50", "$100", "¢25", "¢10", "¢5", "¢1"]
+    billetes = ["$1", "$5", "$10", "$20", "$50", "$100"]
+    monedas = ["¢25", "¢10", "¢5", "¢1"]
     custom_labels = {
         "$1": "💵 $1", "$5": "💵 $5", "$10": "💵 $10", "$20": "💵 $20",
-        "$50": "💵 $50", "$100": "💵 $100", "¢25": "💸 ¢25", "¢10": "💸 ¢10",
-        "¢5": "💸 ¢5", "¢1": "💸 ¢1"
+        "$50": "💵 $50", "$100": "💵 $100", "¢25": "🪙 ¢25", "¢10": "🪙 ¢10",
+        "¢5": "🪙 ¢5", "¢1": "🪙 ¢1"
     }
     amounts = {}
-    cols = st.columns(4)
-    for i, d in enumerate(denoms):
-        with cols[i % 4]:
+
+    st.markdown("**💵 Billetes**")
+    cols_b = st.columns(4)
+    for i, d in enumerate(billetes):
+        with cols_b[i % 4]:
+            amounts[d] = st.number_input(
+                custom_labels[d],
+                min_value=0.0,
+                step=0.01,
+                value=0.0,
+                format="%.2f",
+                key=f"input_{d}"
+            )
+
+    st.markdown("**🪙 Monedas**")
+    cols_m = st.columns(4)
+    for i, d in enumerate(monedas):
+        with cols_m[i % 4]:
             amounts[d] = st.number_input(
                 custom_labels[d],
                 min_value=0.0,
